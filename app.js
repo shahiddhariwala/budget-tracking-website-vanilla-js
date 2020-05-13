@@ -27,7 +27,59 @@ var budgetController  = (function()
 })(); */
 
 //Budget Controller Module , IIFE
-var budgetControllerModule = (function () {})();
+var budgetControllerModule = (function () {
+    var Expense = function(id, description, value) {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    }
+
+    var Income = function(id, description, value) {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+    }
+
+    var data = {
+        allItems: {
+            exp: [],
+            inc: [],
+        },
+        totals: {
+            exp: 0,
+            inc: 0,
+        },
+    };
+
+    return {
+        addItem: function (type, des, val) {
+            var newItem;
+            //Create new ID, adding 1 to id of last added element in array
+            if (data.allItems[type].length != 0) {
+                id = data.allItems[type][data.allItems[type].length - 1].id + 1;
+            } else {
+                id = 0;
+            }
+
+            //Create new item based on type inc or exp
+            if (type === "exp") {
+                newItem = new Expense(id, des, val);
+            } else type === "inc"; {
+                newItem = new Income(id, des, val);
+            }
+
+            //add to our datastructure data
+            data.allItems[type].push(newItem);
+
+            //return the new element
+            return newItem;
+        },
+
+        testing: function () {
+            console.log(data);
+        },
+    };
+})();
 
 //UI Controller
 var UIControllerModule = (function () {
@@ -70,15 +122,22 @@ var controller = (function (budgetCtrl, UICtrl) {
 
     var ctrlAddItem = function () {
         /* 
-           2. Add the item to the budget controller
-           3. Add the item to the UI 
-           4. Calculate the budget
-           5. DIsplay the budget on the UI
-         */
+               3. Add the item to the UI 
+               4. Calculate the budget
+               5. DIsplay the budget on the UI
+             */
 
         //1. Get the input data
         var inputData = UICtrl.getInput();
-        console.log(inputData);
+
+        //2. Add the item to the budget controller
+        var newItem = budgetCtrl.addItem(
+            inputData.type,
+            inputData.description,
+            inputData.value
+        );
+
+        //3.
     };
 
     return {
