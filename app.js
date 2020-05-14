@@ -28,17 +28,17 @@ var budgetController  = (function()
 
 //Budget Controller Module , IIFE
 var budgetControllerModule = (function () {
-    var Expense = function(id, description, value) {
+    var Expense = function (id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+    };
 
-    var Income = function(id, description, value) {
+    var Income = function (id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+    };
 
     var data = {
         allItems: {
@@ -49,8 +49,17 @@ var budgetControllerModule = (function () {
             exp: 0,
             inc: 0,
         },
+        budget: 0,
+        percentage: -1
     };
 
+    var calculateTotal = function (type) {
+        var sum = 0;
+        data.allItems[type].forEach(function (currentElement) {
+            sum += currentElement.value;
+        });
+        data.totals[type] = sum;
+    };
     return {
         addItem: function (type, des, val) {
             var newItem;
@@ -75,6 +84,34 @@ var budgetControllerModule = (function () {
             return newItem;
         },
 
+        calculateBudget: function () {
+            //Calculate total income and expense
+            calculateTotal('exp');
+            calculateTotal('inc');
+
+            //Caclulate budget : income  - expense
+            data.budget = data.totals.inc - data.totals.exp;
+
+            // Caclulate the percentage of income we spent
+            if (data.totals.inc > 0) {
+                data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            } else {
+                data.percentage = -1;
+            }
+
+
+        },
+
+
+        getBudget: function () {
+            return {
+                budget: data.budget,
+                totalIncome: data.totals.inc,
+                totalExpense: data.totals.exp,
+                percentage: data.percentage,
+            };
+        },
+
         testing: function () {
             console.log(data);
         },
@@ -88,17 +125,73 @@ var UIControllerModule = (function () {
         inputDescription: ".add__description",
         inputValue: ".add__value",
         inputButton: ".add__btn",
+        incomeContainer: ".income__list",
+        expenseContainer: ".expenses__list",
+        budgetLabel: ".budget__value",
+        incomeLabel: ".budget__income--value",
+        expenseLabel: ".budget__expenses--value",
+        expensePercentage: ".budget__expenses--percentage",
     };
     return {
         getInput: function () {
             return {
                 type: document.querySelector(domStrings.inputType).value, // We will be getting inc or exp
                 description: document.querySelector(domStrings.inputDescription).value,
-                value: document.querySelector(domStrings.inputValue).value,
+                value: parseFloat(document.querySelector(domStrings.inputValue).value),
             };
         },
         getDomStrings: function () {
             return domStrings;
+        },
+
+        addListItem: function (obj, type) {
+            var html, newHtml, container;
+            // Create HTML string with placeholder text
+            if (type === "inc") {
+                container = domStrings.incomeContainer;
+                html =
+                    '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+            } else if (type === "exp") {
+                container = domStrings.expenseContainer;
+                html =
+                    '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+            }
+            // Replace the placeholder with actual data
+            newHtml = html.replace("%description%", obj.description);
+            newHtml = newHtml.replace("%value%", obj.value);
+            newHtml = newHtml.replace("%id%", obj.id);
+
+            // Insert the html into DOM
+            document
+                .querySelector(container)
+                .insertAdjacentHTML("beforeEnd", newHtml);
+        },
+
+        clearFields: function () {
+            var fields = document.querySelectorAll(
+                domStrings.inputDescription + "," + domStrings.inputValue
+            );
+
+            var fieldArray = Array.prototype.slice.call(fields);
+
+            fieldArray.forEach((element) => {
+                element.value = "";
+            });
+
+            fieldArray[0].focus();
+        },
+
+        displayBudget: function (obj) {
+            document.querySelector(domStrings.budgetLabel).textContent = obj.budget;
+            document.querySelector(domStrings.incomeLabel).textContent = obj.totalIncome;
+            document.querySelector(domStrings.expenseLabel).textContent = obj.totalExpense;
+
+
+            if (obj.percentage > 0) {
+                document.querySelector(domStrings.expensePercentage).textContent = obj.percentage;
+            } else {
+                document.querySelector(domStrings.expensePercentage).textContent = "---";
+            }
         },
     };
 })(); //IIFE
@@ -120,29 +213,56 @@ var controller = (function (budgetCtrl, UICtrl) {
         });
     };
 
-    var ctrlAddItem = function () {
-        /* 
-               3. Add the item to the UI 
-               4. Calculate the budget
-               5. DIsplay the budget on the UI
-             */
+    var updateBudget = function () {
+        // 1. Calculate the budget
+        budgetCtrl.calculateBudget();
 
+        // 2. Return the budget
+        var budgetData = budgetCtrl.getBudget();
+
+        // 3. Display the budget on the UI
+        UICtrl.displayBudget(budgetData);
+    };
+
+    var ctrlAddItem = function () {
         //1. Get the input data
         var inputData = UICtrl.getInput();
 
-        //2. Add the item to the budget controller
-        var newItem = budgetCtrl.addItem(
-            inputData.type,
-            inputData.description,
-            inputData.value
-        );
+        if (
+            inputData.description !== "" &&
+            !isNaN(inputData.value) &&
+            inputData.value != 0
+        ) {
+            //2. Add the item to the budget controller
+            var newItem = budgetCtrl.addItem(
+                inputData.type,
+                inputData.description,
+                inputData.value
+            );
 
-        //3.
+            // 3. Add the item to the UI
+            UICtrl.addListItem(newItem, inputData.type);
+
+            //  4. Clear field
+            UICtrl.clearFields();
+
+            //5. Update the budget
+            updateBudget();
+        }
     };
 
     return {
         init: function () {
             console.log("Application has started");
+
+            //Create Fresh Look on reload
+            UICtrl.displayBudget({
+                budget: 0,
+                totalIncome: 0,
+                percentage: -1,
+                totalExpense: 0,
+            });
+
             setUpEventListeners();
         },
     };
