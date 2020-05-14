@@ -106,7 +106,7 @@ var budgetControllerModule = (function () {
             data.budget = data.totals.inc - data.totals.exp;
 
             // Caclulate the percentage of income we spent
-            if (data.totals.inc > 0) {
+            if (data.totals.inc > 0 ) {
                 data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
             } else {
                 data.percentage = -1;
@@ -241,7 +241,7 @@ var controller = (function (budgetCtrl, UICtrl) {
             //inc-1 or exp-1
             splitID = itemID.split('-');
             type = splitID[0];
-            id = splitID[1];
+            id = parseInt(splitID[1]);
 
             //1.  Delete the item from the data structure
             budgetCtrl.deleteItem(type,id);
