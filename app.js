@@ -195,6 +195,13 @@ var UIControllerModule = (function () {
         return (type === "inc" ? "+ " : "- ") + int + "." + dec;
     };
 
+
+    var nodeListForEach = function (list, callback) {
+        for (let index = 0; index < list.length; index++) {
+            callback(list[index], index);
+        }
+    };
+
     return {
         getInput: function () {
             return {
@@ -276,12 +283,6 @@ var UIControllerModule = (function () {
         displayPercentages: function (listPercentages) {
             var fields = document.querySelectorAll(domStrings.expensePercentageLabel);
 
-            var nodeListForEach = function (list, callback) {
-                for (let index = 0; index < list.length; index++) {
-                    callback(list[index], index);
-                }
-            };
-
             nodeListForEach(fields, function (current, index) {
                 if (listPercentages[index] > 0) {
                     current.textContent = listPercentages[index] + "%";
@@ -298,6 +299,19 @@ var UIControllerModule = (function () {
             year = now.getFullYear();
             month = now.getMonth();
             document.querySelector(domStrings.dateLabel).textContent = months[month-1] + " , " + year;
+        },
+
+        changeType : function()
+        {
+            var fields = document.querySelectorAll(domStrings.inputType +"," + domStrings.inputDescription+","+domStrings.inputValue);
+
+            nodeListForEach(fields,function(current)
+            {
+                current.classList.toggle('red-focus');
+            });
+
+            document.querySelector(domStrings.inputButton).classList.toggle('red');
+
         }
     };
 })(); //IIFE
@@ -321,6 +335,8 @@ var controller = (function (budgetCtrl, UICtrl) {
         document
             .querySelector(domStrings.container)
             .addEventListener("click", ctrlDeleteItem);
+
+            document.querySelector(domStrings.inputType).addEventListener('change',UICtrl.changeType);
     };
 
     var ctrlDeleteItem = function (event) {
