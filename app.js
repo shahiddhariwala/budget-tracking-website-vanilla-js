@@ -84,6 +84,19 @@ var budgetControllerModule = (function () {
             return newItem;
         },
 
+        deleteItem: function (type, id) {
+            var ids, index;
+
+            ids = data.allItems[type].map(function (current) {
+                return current.id
+            });
+            index = ids.indexOf(id);
+
+            if (index !==  -1) {
+                data.allItems[type].splice(index, 1);
+            }
+        },
+
         calculateBudget: function () {
             //Calculate total income and expense
             calculateTotal('exp');
@@ -131,7 +144,7 @@ var UIControllerModule = (function () {
         incomeLabel: ".budget__income--value",
         expenseLabel: ".budget__expenses--value",
         expensePercentage: ".budget__expenses--percentage",
-        container:".container",
+        container: ".container",
     };
     return {
         getInput: function () {
@@ -167,6 +180,8 @@ var UIControllerModule = (function () {
                 .querySelector(container)
                 .insertAdjacentHTML("beforeEnd", newHtml);
         },
+
+
 
         clearFields: function () {
             var fields = document.querySelectorAll(
@@ -213,24 +228,24 @@ var controller = (function (budgetCtrl, UICtrl) {
             }
         });
 
-        document.querySelector(domStrings.container).addEventListener('click',ctrlDeleteItem);
+        document.querySelector(domStrings.container).addEventListener('click', ctrlDeleteItem);
     };
 
-    var ctrlDeleteItem = function(event)
-    { var itemID,splitID,id,type; 
+    var ctrlDeleteItem = function (event) {
+        var itemID, splitID, id, type;
         itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
 
         //if id exist
-        if(itemID)
-        {
-            
+        if (itemID) {
+
             //inc-1 or exp-1
             splitID = itemID.split('-');
             type = splitID[0];
             id = splitID[1];
-            
+
             //1.  Delete the item from the data structure
-            //2 . Delete the itemfrom UI
+            budgetCtrl.deleteItem(type,id);
+            //2 . Delete the item\from UI
             //3 . Update the global budget
 
 
