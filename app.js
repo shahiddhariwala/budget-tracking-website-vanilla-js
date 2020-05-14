@@ -298,7 +298,7 @@ var UIControllerModule = (function () {
             months = ['Jan','Feb','Mar','April','May','June','July','Aug','Sept','Oct','Nov','Dec'];
             year = now.getFullYear();
             month = now.getMonth();
-            document.querySelector(domStrings.dateLabel).textContent = months[month-1] + " , " + year;
+            document.querySelector(domStrings.dateLabel).textContent = months[month] + " , " + year;
         },
 
         changeType : function()
