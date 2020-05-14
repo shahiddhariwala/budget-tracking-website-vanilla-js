@@ -131,6 +131,7 @@ var UIControllerModule = (function () {
         incomeLabel: ".budget__income--value",
         expenseLabel: ".budget__expenses--value",
         expensePercentage: ".budget__expenses--percentage",
+        container:".container",
     };
     return {
         getInput: function () {
@@ -150,11 +151,11 @@ var UIControllerModule = (function () {
             if (type === "inc") {
                 container = domStrings.incomeContainer;
                 html =
-                    '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                    '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else if (type === "exp") {
                 container = domStrings.expenseContainer;
                 html =
-                    '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                    '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             // Replace the placeholder with actual data
             newHtml = html.replace("%description%", obj.description);
@@ -211,8 +212,30 @@ var controller = (function (budgetCtrl, UICtrl) {
                 ctrlAddItem();
             }
         });
+
+        document.querySelector(domStrings.container).addEventListener('click',ctrlDeleteItem);
     };
 
+    var ctrlDeleteItem = function(event)
+    { var itemID,splitID,id,type; 
+        itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+        //if id exist
+        if(itemID)
+        {
+            
+            //inc-1 or exp-1
+            splitID = itemID.split('-');
+            type = splitID[0];
+            id = splitID[1];
+            
+            //1.  Delete the item from the data structure
+            //2 . Delete the itemfrom UI
+            //3 . Update the global budget
+
+
+        }
+    };
     var updateBudget = function () {
         // 1. Calculate the budget
         budgetCtrl.calculateBudget();
