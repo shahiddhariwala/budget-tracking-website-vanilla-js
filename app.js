@@ -182,6 +182,11 @@ var UIControllerModule = (function () {
         },
 
 
+        deleteListItem: function(selectorID)
+        {
+            var element = document.getElementById(selectorID);
+            element.parentNode.removeChild(element);
+        },
 
         clearFields: function () {
             var fields = document.querySelectorAll(
@@ -245,9 +250,12 @@ var controller = (function (budgetCtrl, UICtrl) {
 
             //1.  Delete the item from the data structure
             budgetCtrl.deleteItem(type,id);
-            //2 . Delete the item\from UI
-            //3 . Update the global budget
 
+            //2 . Delete the item\from UI
+            UICtrl.deleteListItem(itemID);
+
+            //3 . Update the global budget
+            updateBudget();
 
         }
     };
